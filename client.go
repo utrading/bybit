@@ -38,6 +38,8 @@ type Client struct {
 
 	referer string
 
+	headers map[string]string
+
 	checkResponseBody        checkResponseBodyFunc
 	syncTimeDeltaNanoSeconds int64
 }
@@ -109,8 +111,17 @@ func (c *Client) WithReferer(referer string) *Client {
 	return c
 }
 
+func (c *Client) WithHeaders(headers map[string]string) *Client {
+	c.headers = headers
+
+	return c
+}
+
 // Request :
 func (c *Client) Request(req *http.Request, dst interface{}) (err error) {
+	for k, v := range c.headers {
+		req.Header.Set(k, v)
+	}
 	c.debugf("request: %v", req)
 	resp, err := c.httpClient.Do(req)
 	c.debugf("response: %v", resp)
